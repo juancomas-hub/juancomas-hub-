@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tatacoa Viva Tours | Agencia de turismo del Huila</title>
+  <meta name="description" content="Tours al Desierto de la Tatacoa, San Agustín y Villavieja. Reserva tu aventura en el Huila.">
+
+  <!-- Modo oscuro: se aplica antes de pintar para evitar parpadeo -->
+  <script>
+    try {
+      if (localStorage.theme === 'dark' ||
+         (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      }
+    } catch (e) { /* sin localStorage: se usa el modo claro */ }
+  </script>
+
+  <!-- Fuentes (máximo dos): Playfair Display para títulos e Inter para textos -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS 4 (Play CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+  <style type="text/tailwindcss">
+    /* Modo oscuro controlado por la clase "dark" en <html> */
+    @custom-variant dark (&:where(.dark, .dark *));
+
+    @theme {
+      /* ---- Regla 60-30-10 ---- */
+      --color-dominant: #FBF5EA;   /* 60 %: crema arena (fondos) */
+      --color-sand: #F3E7D3;       /* tono del 60 % para tarjetas */
+      --color-secondary: #7C2D12;  /* 30 %: terracota oscuro (títulos, pie, bloques) */
+      --color-accent: #F5B301;     /* 10 %: amarillo sol (botones y detalles) */
+
+      /* ---- Colores semánticos ---- */
+      --color-success: #15803D;
+      --color-error: #B91C1C;
+      --color-error-light: #FCA5A5; /* error legible sobre fondo oscuro */
+      --color-warning: #B45309;
+
+      /* ---- Texto y modo oscuro ---- */
+      --color-ink: #2B1408;
+      --color-muted: #5B4636;
+      --color-muted-dark: #D9C9B5;
+      --color-night: #1C120C;
+      --color-night-card: #2A1A11;
+      --color-night-deep: #120A06;
+
+      /* ---- Fuentes ---- */
+      --font-display: "Playfair Display", serif;
+      --font-sans: "Inter", sans-serif;
+    }
+
+    @layer base {
+      html { scroll-behavior: smooth; scroll-padding-top: 5rem; }
+      /* Foco visible en todo elemento interactivo */
+      :focus-visible { outline: 3px solid #7C2D12; outline-offset: 3px; }
+      .dark :focus-visible, .on-dark :focus-visible { outline-color: #F5B301; }
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        * { transition: none !important; }
+      }
+    }
+
+    @layer components {
+      .btn-primary {
+        @apply inline-flex items-center justify-center rounded-full bg-accent px-6 py-3 font-semibold text-ink
+               shadow transition hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:brightness-95;
+      }
+      .btn-outline {
+        @apply inline-flex items-center justify-center rounded-full border-2 border-white px-6 py-3 font-semibold text-white
+               transition hover:bg-white hover:text-secondary active:bg-dominant;
+      }
+      .field {
+        @apply mt-1 w-full rounded-lg border border-muted bg-white px-4 py-3 text-ink
+               focus:border-secondary dark:border-muted-dark dark:bg-night dark:text-dominant;
+      }
+      .field-error { @apply mt-1 min-h-5 text-sm font-medium text-error dark:text-error-light; }
+    }
+  </style>
+</head>
+
+<body class="bg-dominant font-sans text-ink antialiased transition-colors dark:bg-night dark:text-dominant">
+
+  <!-- Enlace para saltar al contenido (accesibilidad con teclado) -->
+  <a href="#inicio" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-accent focus:px-4 focus:py-2 focus:text-ink">
+    Saltar al contenido
+  </a>
+
+  <!-- ================= 1. NAVBAR ================= -->
+  <header class="sticky top-0 z-40 border-b border-secondary/20 bg-dominant/95 backdrop-blur dark:border-dominant/20 dark:bg-night/95">
+    <nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6" aria-label="Principal">
+      <a href="#inicio" class="font-display text-xl font-extrabold text-secondary dark:text-accent">Tatacoa Viva</a>
+
+      <!-- Enlaces de escritorio -->
+      <ul class="hidden items-center gap-6 md:flex">
+        <li><a href="#tours" class="font-medium hover:text-secondary hover:underline dark:hover:text-accent">Tours</a></li>
+        <li><a href="#nosotros" class="font-medium hover:text-secondary hover:underline dark:hover:text-accent">Nosotros</a></li>
+        <li><a href="#faq" class="font-medium hover:text-secondary hover:underline dark:hover:text-accent">Preguntas</a></li>
+        <li><a href="#contacto" class="btn-primary !py-2">Reservar</a></li>
+      </ul>
+
+      <div class="flex items-center gap-2">
+        <!-- Botón modo oscuro -->
+        <button id="theme-toggle" type="button" aria-pressed="false" aria-label="Activar modo oscuro"
+                class="rounded-full border border-secondary p-2 text-secondary transition hover:bg-secondary hover:text-dominant dark:border-accent dark:text-accent dark:hover:bg-accent dark:hover:text-ink">
+          <span id="theme-icon" aria-hidden="true">🌙</span>
+        </button>
+
+        <!-- Botón hamburguesa (solo celular) -->
+        <button id="menu-btn" type="button" aria-expanded="false" aria-controls="mobile-menu" aria-label="Abrir menú"
+                class="rounded-lg border border-secondary p-2 text-secondary transition hover:bg-secondary hover:text-dominant md:hidden dark:border-accent dark:text-accent dark:hover:bg-accent dark:hover:text-ink">
+          <svg id="icon-open" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          <svg id="icon-close" class="hidden h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Menú móvil -->
+    <div id="mobile-menu" class="hidden border-t border-secondary/20 md:hidden dark:border-dominant/20">
+      <ul class="flex flex-col gap-1 px-4 py-3 sm:px-6">
+        <li><a href="#tours" class="block rounded-lg px-3 py-3 font-medium hover:bg-sand dark:hover:bg-night-card">Tours</a></li>
+        <li><a href="#nosotros" class="block rounded-lg px-3 py-3 font-medium hover:bg-sand dark:hover:bg-night-card">Nosotros</a></li>
+        <li><a href="#faq" class="block rounded-lg px-3 py-3 font-medium hover:bg-sand dark:hover:bg-night-card">Preguntas</a></li>
+        <li><a href="#contacto" class="btn-primary mt-2 w-full">Reservar</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main id="inicio">
+
+    <!-- ================= 2. HERO ================= -->
+    <section class="on-dark relative isolate overflow-hidden bg-secondary text-white" aria-labelledby="hero-title">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/El_Desierto_de_Tatacoah%2C_Colombia_-_Panorama.jpg/1280px-El_Desierto_de_Tatacoah%2C_Colombia_-_Panorama.jpg" alt="Vista panorámica del Desierto de la Tatacoa, en el Huila"
+           class="absolute inset-0 -z-20 h-full w-full object-cover" width="1600" height="900">
+      <div class="absolute inset-0 -z-10 bg-gradient-to-b from-secondary/80 to-night/90" aria-hidden="true"></div>
+
+      <div class="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28 lg:py-36">
+        <p class="text-sm font-semibold uppercase tracking-widest text-accent">Huila, Colombia</p>
+        <h1 id="hero-title" class="mt-3 max-w-3xl font-display text-4xl font-extrabold leading-tight sm:text-5xl lg:text-6xl">
+          Vive el desierto, la historia y la aventura del Huila
+        </h1>
+        <p class="mt-5 max-w-xl text-lg text-white/90 sm:text-xl">
+          Tours guiados a la Tatacoa, San Agustín y Villavieja con guías locales, transporte seguro y grupos pequeños.
+        </p>
+        <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+          <a href="#tours" class="btn-primary">Ver tours</a>
+          <a href="#contacto" class="btn-outline">Reservar ahora</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 3. TOURS (tarjetas + filtro) ================= -->
+    <section id="tours" class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24" aria-labelledby="tours-title">
+      <h2 id="tours-title" class="font-display text-3xl font-bold text-secondary sm:text-4xl dark:text-accent">Nuestros tours</h2>
+      <p class="mt-2 max-w-2xl text-muted dark:text-muted-dark">Elige la experiencia que más te guste. Los precios son por persona e incluyen guía y seguro.</p>
+
+      <!-- Filtro (componente extra) -->
+      <div class="mt-6 flex flex-wrap gap-2" role="group" aria-label="Filtrar tours por categoría">
+        <button type="button" data-filter="todos" aria-pressed="true" class="filter-btn rounded-full border-2 border-secondary px-4 py-2 text-sm font-semibold transition dark:border-accent">Todos</button>
+        <button type="button" data-filter="desierto" aria-pressed="false" class="filter-btn rounded-full border-2 border-secondary px-4 py-2 text-sm font-semibold transition dark:border-accent">Desierto</button>
+        <button type="button" data-filter="cultura" aria-pressed="false" class="filter-btn rounded-full border-2 border-secondary px-4 py-2 text-sm font-semibold transition dark:border-accent">Cultura</button>
+        <button type="button" data-filter="aventura" aria-pressed="false" class="filter-btn rounded-full border-2 border-secondary px-4 py-2 text-sm font-semibold transition dark:border-accent">Aventura</button>
+      </div>
+      <p id="filter-status" class="sr-only" aria-live="polite"></p>
+
+      <!-- Grid: 1 columna (celular), 2 (tablet), 3 (computador) -->
+      <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+
+        <article data-cat="desierto" class="tour-card overflow-hidden rounded-2xl bg-sand shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:bg-night-card">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Laberintos_del_Cusco%2C_Desierto_de_la_Tatacoa.jpg/500px-Laberintos_del_Cusco%2C_Desierto_de_la_Tatacoa.jpg" alt="Laberintos del Cuzco, formaciones de arena rojiza en el Desierto de la Tatacoa" loading="lazy" width="600" height="400" class="h-48 w-full object-cover">
+          <div class="p-5">
+            <span class="rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-dominant dark:bg-accent dark:text-ink">Desierto</span>
+            <h3 class="mt-3 font-display text-xl font-bold">Desierto de la Tatacoa</h3>
+            <p class="mt-2 text-muted dark:text-muted-dark">Recorre el Cuzco rojo y Los Hoyos, y date un chapuzón en las piscinas naturales.</p>
+            <div class="mt-4 flex items-center justify-between gap-2">
+              <p class="font-bold">$180.000 <span class="text-sm font-normal text-muted dark:text-muted-dark">COP</span></p>
+              <a href="#contacto" class="btn-primary !px-4 !py-2 text-sm">Reservar</a>
+            </div>
+          </div>
+        </article>
+
+        <article data-cat="desierto" class="tour-card overflow-hidden rounded-2xl bg-sand shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:bg-night-card">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Panoramica_del_Observatorio_Astron%C3%B3mico_de_la_Tatacoa_en_Villavieja.jpg/500px-Panoramica_del_Observatorio_Astron%C3%B3mico_de_la_Tatacoa_en_Villavieja.jpg" alt="Observatorio Astronómico de la Tatacoa, en Villavieja" loading="lazy" width="600" height="400" class="h-48 w-full object-cover">
+          <div class="p-5">
+            <span class="rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-dominant dark:bg-accent dark:text-ink">Desierto</span>
+            <h3 class="mt-3 font-display text-xl font-bold">Noche de astronomía</h3>
+            <p class="mt-2 text-muted dark:text-muted-dark">Observa constelaciones y planetas con telescopio y guía especializado.</p>
+            <div class="mt-4 flex items-center justify-between gap-2">
+              <p class="font-bold">$120.000 <span class="text-sm font-normal text-muted dark:text-muted-dark">COP</span></p>
+              <a href="#contacto" class="btn-primary !px-4 !py-2 text-sm">Reservar</a>
+            </div>
+          </div>
+        </article>
+
+        <article data-cat="cultura" class="tour-card overflow-hidden rounded-2xl bg-sand shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:bg-night-card">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Parque_Arqueol%C3%B3gico_de_San_Agust%C3%ADn_-_Deity_2.jpg/500px-Parque_Arqueol%C3%B3gico_de_San_Agust%C3%ADn_-_Deity_2.jpg" alt="Estatua de piedra de una deidad en el Parque Arqueológico de San Agustín" loading="lazy" width="600" height="400" class="h-48 w-full object-cover">
+          <div class="p-5">
+            <span class="rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-dominant dark:bg-accent dark:text-ink">Cultura</span>
+            <h3 class="mt-3 font-display text-xl font-bold">Parque Arqueológico San Agustín</h3>
+            <p class="mt-2 text-muted dark:text-muted-dark">Descubre las estatuas y tumbas de una de las culturas precolombinas más misteriosas.</p>
+            <div class="mt-4 flex items-center justify-between gap-2">
+              <p class="font-bold">$210.000 <span class="text-sm font-normal text-muted dark:text-muted-dark">COP</span></p>
+              <a href="#contacto" class="btn-primary !px-4 !py-2 text-sm">Reservar</a>
+            </div>
+          </div>
+        </article>
+
+        <article data-cat="cultura" class="tour-card overflow-hidden rounded-2xl bg-sand shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:bg-night-card">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Llegada_al_Lavapatas.jpg/500px-Llegada_al_Lavapatas.jpg" alt="Fuente ceremonial del Lavapatas, tallada en la roca, en San Agustín" loading="lazy" width="600" height="400" class="h-48 w-full object-cover">
+          <div class="p-5">
+            <span class="rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-dominant dark:bg-accent dark:text-ink">Cultura</span>
+            <h3 class="mt-3 font-display text-xl font-bold">Lavapatas y La Chaquira</h3>
+            <p class="mt-2 text-muted dark:text-muted-dark">Recorre la fuente ceremonial del Lavapatas y el sitio arqueológico de La Chaquira con guía local.</p>
+            <div class="mt-4 flex items-center justify-between gap-2">
+              <p class="font-bold">$150.000 <span class="text-sm font-normal text-muted dark:text-muted-dark">COP</span></p>
+              <a href="#contacto" class="btn-primary !px-4 !py-2 text-sm">Reservar</a>
+            </div>
+          </div>
+        </article>
+
+        <article data-cat="aventura" class="tour-card overflow-hidden rounded-2xl bg-sand shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:bg-night-card">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Vista_Estrecho.jpg/500px-Vista_Estrecho.jpg" alt="Vista del Estrecho del Magdalena, donde el río se angosta entre las rocas" loading="lazy" width="600" height="400" class="h-48 w-full object-cover">
+          <div class="p-5">
+            <span class="rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-dominant dark:bg-accent dark:text-ink">Aventura</span>
+            <h3 class="mt-3 font-display text-xl font-bold">Estrecho del Magdalena</h3>
+            <p class="mt-2 text-muted dark:text-muted-dark">Navega por el punto donde el río Magdalena se angosta hasta apenas unos metros.</p>
+            <div class="mt-4 flex items-center justify-between gap-2">
+              <p class="font-bold">$140.000 <span class="text-sm font-normal text-muted dark:text-muted-dark">COP</span></p>
+              <a href="#contacto" class="btn-primary !px-4 !py-2 text-sm">Reservar</a>
+            </div>
+          </div>
+        </article>
+
+        <article data-cat="aventura" class="tour-card overflow-hidden rounded-2xl bg-sand shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:bg-night-card">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Salto_bordones.jpg/500px-Salto_bordones.jpg" alt="Salto de Bordones, cascada en Isnos, Huila" loading="lazy" width="600" height="400" class="h-48 w-full object-cover">
+          <div class="p-5">
+            <span class="rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-dominant dark:bg-accent dark:text-ink">Aventura</span>
+            <h3 class="mt-3 font-display text-xl font-bold">Salto de Bordones</h3>
+            <p class="mt-2 text-muted dark:text-muted-dark">Camina hasta la cascada de Bordones, en Isnos, con paradas en miradores del camino.</p>
+            <div class="mt-4 flex items-center justify-between gap-2">
+              <p class="font-bold">$130.000 <span class="text-sm font-normal text-muted dark:text-muted-dark">COP</span></p>
+              <a href="#contacto" class="btn-primary !px-4 !py-2 text-sm">Reservar</a>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ================= 4. NOSOTROS ================= -->
+    <section id="nosotros" class="bg-secondary text-dominant" aria-labelledby="nosotros-title">
+      <div class="on-dark mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 sm:px-6 md:grid-cols-2 lg:py-24">
+        <div>
+          <h2 id="nosotros-title" class="font-display text-3xl font-bold text-accent sm:text-4xl">Somos de aquí, conocemos cada rincón</h2>
+          <p class="mt-4 text-lg text-dominant/90">
+            Tatacoa Viva nació en Neiva con una idea sencilla: que el turismo deje valor en las comunidades del Huila.
+            Trabajamos con guías, cocineras y familias locales para que vivas una experiencia auténtica y segura.
+          </p>
+          <dl class="mt-8 grid grid-cols-3 gap-4 text-center">
+            <div class="rounded-xl bg-white/10 p-4">
+              <dt class="text-sm text-dominant/90">Años de experiencia</dt>
+              <dd class="font-display text-3xl font-bold text-accent">8+</dd>
+            </div>
+            <div class="rounded-xl bg-white/10 p-4">
+              <dt class="text-sm text-dominant/90">Viajeros felices</dt>
+              <dd class="font-display text-3xl font-bold text-accent">2.500</dd>
+            </div>
+            <div class="rounded-xl bg-white/10 p-4">
+              <dt class="text-sm text-dominant/90">Guías locales</dt>
+              <dd class="font-display text-3xl font-bold text-accent">12</dd>
+            </div>
+          </dl>
+        </div>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Neiva%2C_capital_del_departamento_del_Huila.jpg/500px-Neiva%2C_capital_del_departamento_del_Huila.jpg" alt="Vista de Neiva, capital del Huila, donde nació Tatacoa Viva" loading="lazy" width="700" height="500" class="h-72 w-full rounded-2xl object-cover shadow-xl md:h-96">
+      </div>
+    </section>
+
+    <!-- ================= 5. PREGUNTAS FRECUENTES (acordeón) ================= -->
+    <section id="faq" class="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:py-24" aria-labelledby="faq-title">
+      <h2 id="faq-title" class="font-display text-3xl font-bold text-secondary sm:text-4xl dark:text-accent">Preguntas frecuentes</h2>
+
+      <div class="mt-8 divide-y divide-secondary/20 rounded-2xl border border-secondary/20 bg-sand dark:divide-dominant/20 dark:border-dominant/20 dark:bg-night-card">
+        <div>
+          <h3>
+            <button type="button" aria-expanded="false" aria-controls="faq-1" id="faq-btn-1"
+                    class="faq-btn flex w-full items-center justify-between gap-4 px-5 py-4 text-left font-semibold">
+              ¿Cuál es la mejor época para visitar la Tatacoa?
+              <span class="faq-icon text-xl transition-transform" aria-hidden="true">+</span>
+            </button>
+          </h3>
+          <div id="faq-1" role="region" aria-labelledby="faq-btn-1" class="hidden px-5 pb-4 text-muted dark:text-muted-dark">
+            Todo el año. De diciembre a febrero y de junio a agosto hay menos lluvia. Recomendamos ir temprano o al atardecer por el calor.
+          </div>
+        </div>
+        <div>
+          <h3>
+            <button type="button" aria-expanded="false" aria-controls="faq-2" id="faq-btn-2"
+                    class="faq-btn flex w-full items-center justify-between gap-4 px-5 py-4 text-left font-semibold">
+              ¿Qué incluye el precio del tour?
+              <span class="faq-icon text-xl transition-transform" aria-hidden="true">+</span>
+            </button>
+          </h3>
+          <div id="faq-2" role="region" aria-labelledby="faq-btn-2" class="hidden px-5 pb-4 text-muted dark:text-muted-dark">
+            Incluye guía local, transporte desde el punto de encuentro, seguro de viaje e hidratación. La alimentación se indica en cada tour.
+          </div>
+        </div>
+        <div>
+          <h3>
+            <button type="button" aria-expanded="false" aria-controls="faq-3" id="faq-btn-3"
+                    class="faq-btn flex w-full items-center justify-between gap-4 px-5 py-4 text-left font-semibold">
+              ¿Puedo cancelar o cambiar mi reserva?
+              <span class="faq-icon text-xl transition-transform" aria-hidden="true">+</span>
+            </button>
+          </h3>
+          <div id="faq-3" role="region" aria-labelledby="faq-btn-3" class="hidden px-5 pb-4 text-muted dark:text-muted-dark">
+            Sí. Puedes cambiar la fecha sin costo hasta 48 horas antes del tour escribiéndonos por el formulario.
+          </div>
+        </div>
+        <div>
+          <h3>
+            <button type="button" aria-expanded="false" aria-controls="faq-4" id="faq-btn-4"
+                    class="faq-btn flex w-full items-center justify-between gap-4 px-5 py-4 text-left font-semibold">
+              ¿Qué debo llevar?
+              <span class="faq-icon text-xl transition-transform" aria-hidden="true">+</span>
+            </button>
+          </h3>
+          <div id="faq-4" role="region" aria-labelledby="faq-btn-4" class="hidden px-5 pb-4 text-muted dark:text-muted-dark">
+            Ropa fresca, gorra, bloqueador solar, calzado cómodo, agua y una chaqueta ligera para la noche.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 6. FORMULARIO DE CONTACTO ================= -->
+    <section id="contacto" class="bg-sand py-16 lg:py-24 dark:bg-night-deep" aria-labelledby="contacto-title">
+      <div class="mx-auto max-w-2xl px-4 sm:px-6">
+        <h2 id="contacto-title" class="font-display text-3xl font-bold text-secondary sm:text-4xl dark:text-accent">Reserva tu aventura</h2>
+        <p class="mt-2 text-muted dark:text-muted-dark">Déjanos tus datos y te escribimos en menos de 24 horas. Los campos con * son obligatorios.</p>
+
+        <form id="reserva-form" novalidate class="mt-8 space-y-5 rounded-2xl bg-dominant p-6 shadow-sm sm:p-8 dark:bg-night-card">
+
+          <div>
+            <label for="nombre" class="font-semibold">Nombre completo *</label>
+            <input id="nombre" name="nombre" type="text" autocomplete="name" required aria-describedby="nombre-error" class="field">
+            <p id="nombre-error" class="field-error" role="alert"></p>
+          </div>
+
+          <div>
+            <label for="correo" class="font-semibold">Correo electrónico *</label>
+            <input id="correo" name="correo" type="email" autocomplete="email" required aria-describedby="correo-error" class="field">
+            <p id="correo-error" class="field-error" role="alert"></p>
+          </div>
+
+          <div class="grid gap-5 sm:grid-cols-2">
+            <div>
+              <label for="tour" class="font-semibold">Tour *</label>
+              <select id="tour" name="tour" required aria-describedby="tour-error" class="field">
+                <option value="">Selecciona un tour</option>
+                <option>Desierto de la Tatacoa</option>
+                <option>Noche de astronomía</option>
+                <option>Parque Arqueológico San Agustín</option>
+                <option>Lavapatas y La Chaquira</option>
+                <option>Estrecho del Magdalena</option>
+                <option>Salto de Bordones</option>
+              </select>
+              <p id="tour-error" class="field-error" role="alert"></p>
+            </div>
+            <div>
+              <label for="personas" class="font-semibold">Personas (1 a 10) *</label>
+              <input id="personas" name="personas" type="number" min="1" max="10" inputmode="numeric" required aria-describedby="personas-error" class="field">
+              <p id="personas-error" class="field-error" role="alert"></p>
+            </div>
+          </div>
+
+          <div>
+            <label for="fecha" class="font-semibold">Fecha del tour *</label>
+            <input id="fecha" name="fecha" type="date" required aria-describedby="fecha-error" class="field">
+            <p id="fecha-error" class="field-error" role="alert"></p>
+          </div>
+
+          <div>
+            <label for="mensaje" class="font-semibold">Comentarios (opcional)</label>
+            <textarea id="mensaje" name="mensaje" rows="4" class="field"></textarea>
+          </div>
+
+          <button type="submit" class="btn-primary w-full sm:w-auto">Enviar reserva</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- ================= 7. PIE DE PÁGINA ================= -->
+  <footer class="on-dark bg-secondary text-dominant dark:bg-night-deep">
+    <div class="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-3">
+      <div>
+        <p class="font-display text-xl font-extrabold text-accent">Tatacoa Viva</p>
+        <p class="mt-2 text-dominant/90">Turismo responsable en el Huila, Colombia.</p>
+      </div>
+      <div>
+        <h2 class="font-semibold text-accent">Contacto</h2>
+        <address class="mt-2 not-italic text-dominant/90">
+          Calle 8 # 5-20, Neiva, Huila<br>
+          Lunes a sábado, 8:00 a.m. a 6:00 p.m.<br>
+          <a href="mailto:hola@tatacoaviva.example" class="underline hover:text-accent">hola@tatacoaviva.example</a>
+        </address>
+      </div>
+      <div>
+        <h2 class="font-semibold text-accent">Síguenos</h2>
+        <ul class="mt-2 space-y-1">
+          <li><a href="#" class="underline hover:text-accent">Instagram</a></li>
+          <li><a href="#" class="underline hover:text-accent">Facebook</a></li>
+          <li><a href="#" class="underline hover:text-accent">WhatsApp</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="border-t border-dominant/20 px-4 py-4 text-center text-sm text-dominant/90">
+      © 2026 Tatacoa Viva Tours. Todos los derechos reservados. Proyecto académico.
+    </p>
+  </footer>
+
+  <!-- Toast de confirmación -->
+  <div id="toast" role="status" aria-live="polite"
+       class="pointer-events-none fixed bottom-4 left-4 right-4 z-50 translate-y-6 rounded-xl bg-success px-5 py-4 font-semibold text-white opacity-0 shadow-xl transition duration-300 sm:left-auto sm:max-w-sm">
+  </div>
+
+  <!-- ================= JAVASCRIPT ================= -->
+  <script>
+    // --- Utilidades ---
+    const $ = (sel, ctx = document) => ctx.querySelector(sel);
+    const $$ = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
+
+    // --- Imágenes de respaldo: si una imagen no carga se muestra un marcador ---
+    $$('img').forEach(img => {
+      img.addEventListener('error', () => {
+        const texto = (img.alt || 'Imagen').replace(/[<>&"]/g, '');
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500">
+          <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#7C2D12"/><stop offset="1" stop-color="#C2410C"/></linearGradient></defs>
+          <rect width="800" height="500" fill="url(#g)"/>
+          <text x="400" y="260" font-family="sans-serif" font-size="26" fill="#FBF5EA" text-anchor="middle">Imagen no disponible</text></svg>`;
+        img.src = 'data:image/svg+xml,' + encodeURIComponent(svg);
+      }, { once: true });
+    });
+
+    // --- Modo oscuro ---
+    const themeBtn = $('#theme-toggle');
+    const themeIcon = $('#theme-icon');
+    function syncThemeButton() {
+      const oscuro = document.documentElement.classList.contains('dark');
+      themeBtn.setAttribute('aria-pressed', oscuro);
+      themeBtn.setAttribute('aria-label', oscuro ? 'Activar modo claro' : 'Activar modo oscuro');
+      themeIcon.textContent = oscuro ? '☀️' : '🌙';
+    }
+    themeBtn.addEventListener('click', () => {
+      const oscuro = document.documentElement.classList.toggle('dark');
+      try { localStorage.theme = oscuro ? 'dark' : 'light'; } catch (e) {}
+      syncThemeButton();
+    });
+    syncThemeButton();
+
+    // --- Menú hamburguesa ---
+    const menuBtn = $('#menu-btn');
+    const menu = $('#mobile-menu');
+    function setMenu(abierto) {
+      menu.classList.toggle('hidden', !abierto);
+      $('#icon-open').classList.toggle('hidden', abierto);
+      $('#icon-close').classList.toggle('hidden', !abierto);
+      menuBtn.setAttribute('aria-expanded', abierto);
+      menuBtn.setAttribute('aria-label', abierto ? 'Cerrar menú' : 'Abrir menú');
+    }
+    menuBtn.addEventListener('click', () => setMenu(menu.classList.contains('hidden')));
+    $$('a', menu).forEach(a => a.addEventListener('click', () => setMenu(false)));   // se cierra al elegir un enlace
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') setMenu(false); });
+    window.matchMedia('(min-width: 768px)').addEventListener('change', e => { if (e.matches) setMenu(false); });
+
+    // --- Filtro de tours ---
+    const filterBtns = $$('.filter-btn');
+    const cards = $$('.tour-card');
+    function aplicarEstiloFiltro(btn, activo) {
+      btn.setAttribute('aria-pressed', activo);
+      btn.classList.toggle('bg-secondary', activo);
+      btn.classList.toggle('text-dominant', activo);
+      btn.classList.toggle('dark:bg-accent', activo);
+      btn.classList.toggle('dark:text-ink', activo);
+    }
+    filterBtns.forEach(btn => btn.addEventListener('click', () => {
+      const cat = btn.dataset.filter;
+      let visibles = 0;
+      cards.forEach(card => {
+        const mostrar = cat === 'todos' || card.dataset.cat === cat;
+        card.classList.toggle('hidden', !mostrar);
+        if (mostrar) visibles++;
+      });
+      filterBtns.forEach(b => aplicarEstiloFiltro(b, b === btn));
+      $('#filter-status').textContent = `${visibles} tours mostrados`;
+    }));
+    aplicarEstiloFiltro(filterBtns[0], true);
+
+    // --- Acordeón de preguntas frecuentes ---
+    $$('.faq-btn').forEach(btn => btn.addEventListener('click', () => {
+      const abierto = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', !abierto);
+      $('#' + btn.getAttribute('aria-controls')).classList.toggle('hidden', abierto);
+      $('.faq-icon', btn).textContent = abierto ? '+' : '−';
+    }));
+
+    // --- Toast ---
+    const toast = $('#toast');
+    let toastTimer;
+    function mostrarToast(mensaje) {
+      toast.textContent = mensaje;
+      toast.classList.remove('opacity-0', 'translate-y-6');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.add('opacity-0', 'translate-y-6'), 4000); // desaparece a los 4 s
+    }
+
+    // --- Validación del formulario ---
+    const form = $('#reserva-form');
+    const hoy = new Date().toISOString().split('T')[0];
+    $('#fecha').min = hoy;
+
+    const reglas = {
+      nombre: v => v.trim().length < 3 ? 'Escribe tu nombre completo (mínimo 3 letras).' : '',
+      correo: v => {
+        if (!v.trim()) return 'El correo es obligatorio.';
+        return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v) ? '' : 'Escribe un correo válido, por ejemplo nombre@correo.com.';
+      },
+      tour: v => v ? '' : 'Selecciona un tour.',
+      personas: v => {
+        const n = Number(v);
+        return (!v || !Number.isInteger(n) || n < 1 || n > 10) ? 'Indica un número de personas entre 1 y 10.' : '';
+      },
+      fecha: v => !v ? 'Selecciona una fecha.' : (v < hoy ? 'La fecha no puede ser anterior a hoy.' : '')
+    };
+
+    function validarCampo(nombre) {
+      const campo = form.elements[nombre];
+      const error = reglas[nombre](campo.value);
+      $('#' + nombre + '-error').textContent = error;
+      campo.setAttribute('aria-invalid', error ? 'true' : 'false');
+      campo.classList.toggle('!border-error', Boolean(error));
+      return !error;
+    }
+
+    Object.keys(reglas).forEach(nombre => {
+      form.elements[nombre].addEventListener('blur', () => validarCampo(nombre));
+      form.elements[nombre].addEventListener('input', () => {
+        if (form.elements[nombre].getAttribute('aria-invalid') === 'true') validarCampo(nombre);
+      });
+    });
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const resultados = Object.keys(reglas).map(validarCampo);
+      if (resultados.every(Boolean)) {
+        mostrarToast('¡Reserva enviada! Te contactaremos pronto.');
+        form.reset();
+      } else {
+        const primero = Object.keys(reglas).find(n => form.elements[n].getAttribute('aria-invalid') === 'true');
+        form.elements[primero].focus();
+      }
+    });
+  </script>
+</body>
+</html>
